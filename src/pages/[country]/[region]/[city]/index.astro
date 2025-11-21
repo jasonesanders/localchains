@@ -1,0 +1,84 @@
+---
+import { getCollection } from 'astro:content';
+import Layout from '../../../../layouts/MinimalLayout.astro';
+
+const slugify = (str) => str.toLowerCase().replace(/ /g, '-').replace(/[^\w-]+/g, '');
+
+export async function getStaticPaths() {
+  const slugify = (str) => str.toLowerCase().replace(/ /g, '-').replace(/[^\w-]+/g, '');
+  const allChains = await getCollection('chains');
+  const uniquePaths = new Set();
+  const paths = [];
+
+  allChains.forEach(chain => {
+    // Create unique ID to ensure we don't generate the same city page twice
+    const id = `${slugify(chain.data.country)}-${slugify(chain.data.region)}-${slugify(chain.data.city)}`;
+    if (!uniquePaths.has(id)) {
+        uniquePaths.add(id);
+        paths.push({
+            params: { 
+                country: slugify(chain.data.country), 
+                region: slugify(chain.data.region),
+                city: slugify(chain.data.city) 
+            },
+            props: { 
+                countryName: chain.data.country, 
+                regionName: chain.data.region,
+                cityName: chain.data.city 
+            }
+        });
+    }
+  });
+  return paths;
+}
+
+const { country, region, city } = Astro.params;
+const { countryName, regionName, cityName } = Astro.props;
+
+// Get chains for THIS city only
+const allChains = await getCollection('chains');
+const cityChains = allChains.filter(c => 
+  slugify(c.data.country) === country && 
+  slugify(c.data.region) === region && 
+  slugify(c.data.city) === city
+);
+
+// Group by Category
+const byCategory = {};
+cityChains.forEach(chain => {
+  const cat = chain.data.category;
+  if (!byCategory[cat]) byCategory[cat] = [];
+  byCategory[cat].push(chain);
+});
+---
+
+<Layout title={`${cityName}`}>
+  <header>
+    <h1>{cityName}</h1>
+    <span class="badge">{regionName}, {countryName}</span>
+  </header>
+
+  <div class="categories-grid">
+    {Object.keys(byCategory).map((category) => (
+      <div class="category-column">
+        <h3>{category}s</h3>
+        <ul class="business-list">
+          {byCategory[category].map((chain) => (
+            <li>
+              <a href={`/${country}/${region}/${city}/${chain.slug}`}>{chain.data.title}</a>
+            </li>
+          ))}
+        </ul>
+      </div>
+    ))}
+  </div>
+</Layout>
+
+<style>
+  header { margin-bottom: 4rem; border-bottom: 1px solid #eee; padding-bottom: 2rem; }
+  .badge { font-family: monospace; text-transform: uppercase; background: #eee; padding: 4px 8px; font-size: 0.8rem;}
+  .categories-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 2rem; }
+  h3 { font-size: 1rem; text-transform: uppercase; color: #888; border-bottom: 1px solid #eee; padding-bottom: 5px; margin-bottom: 1rem;}
+  .business-list a { display: block; font-size: 1.5rem; font-weight: bold; border: none; margin-bottom: 0.5rem; }
+  .business-list a:hover { text-decoration: underline; background: transparent; color: black; }
+</style>

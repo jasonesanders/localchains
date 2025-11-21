@@ -1,0 +1,68 @@
+---
+import { getCollection } from 'astro:content';
+import Layout from '../../../../layouts/MinimalLayout.astro';
+
+function slugify(str) { return str.toLowerCase().replace(/ /g, '-').replace(/[^\w-]+/g, ''); }
+
+export async function getStaticPaths() {
+  const slugify = (str) => str.toLowerCase().replace(/ /g, '-').replace(/[^\w-]+/g, '');
+  const chainEntries = await getCollection('chains');
+  return chainEntries.map(entry => ({
+    params: { 
+      country: slugify(entry.data.country), 
+      region: slugify(entry.data.region),
+      city: slugify(entry.data.city),
+      slug: entry.slug 
+    }, 
+    props: { entry },
+  }));
+}
+
+const { entry } = Astro.props;
+const { Content } = await entry.render();
+const backLink = `/${slugify(entry.data.country)}/${slugify(entry.data.region)}/${slugify(entry.data.city)}`;
+---
+
+<Layout title={entry.data.title}>
+  <a href={backLink} class="back-link">← {entry.data.city}</a>
+
+  <main>
+    <h1 class="title">{entry.data.title}</h1>
+    <p class="specialty">{entry.data.specialty}</p>
+
+    <div class="content-body">
+      <Content />
+    </div>
+
+    <div class="info-grid">
+      <div class="col">
+        <h3>Three Things to Order</h3>
+        <ul class="data-list">
+          <li><span class="label">Dish</span> {entry.data.three_things.food}</li>
+          <li><span class="label">Drink</span> {entry.data.three_things.drink}</li>
+          <li><span class="label">Other</span> {entry.data.three_things.other}</li>
+        </ul>
+      </div>
+
+      <div class="col">
+        <h3>Locations</h3>
+        <ul class="data-list">
+          {entry.data.addresses.map(addr => <li>{addr}</li>)}
+        </ul>
+      </div>
+    </div>
+  </main>
+</Layout>
+
+<style>
+    .back-link { font-family: monospace; font-size: 0.9rem; color: #666; border: none; display: block; margin-bottom: 2rem; }
+    .title { font-size: 5rem; margin: 0; line-height: 0.9; letter-spacing: -2px; }
+    .specialty { font-size: 1.5rem; color: #666; margin-top: 1rem; max-width: 600px; }
+    .content-body { font-size: 1.2rem; max-width: 600px; margin-top: 3rem; line-height: 1.6; margin-bottom: 4rem; }
+    
+    .info-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 4rem; border-top: 4px solid black; padding-top: 2rem; }
+    h3 { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 1.5rem; color: #888; }
+    
+    .data-list li { margin-bottom: 0.8rem; font-size: 1.1rem; border-bottom: 1px solid #eee; padding-bottom: 0.5rem; }
+    .label { background: black; color: white; font-size: 0.7rem; padding: 2px 5px; text-transform: uppercase; margin-right: 10px; vertical-align: middle; }
+</style>
