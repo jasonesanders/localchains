@@ -28,7 +28,7 @@ allChains.forEach((chain) => {
                 <h3>{region}</h3>
                 <div class="city-list">
                 {Array.from(structure[country][region]).sort().map((city) => (
-                    <a href={`${import.meta.env.BASE_URL}${slugify(country)}/${slugify(region)}/${slugify(city)}`} class="city-link">
+                    <a href={`${import.meta.env.BASE_URL}/${slugify(country)}/${slugify(region)}/${slugify(city)}`} class="city-link">
                     {city}
                     </a>
                 ))}

@@ -20,7 +20,7 @@ export async function getStaticPaths() {
 
 const { entry } = Astro.props;
 const { Content } = await entry.render();
-const backLink = `${import.meta.env.BASE_URL}${slugify(entry.data.country)}/${slugify(entry.data.region)}/${slugify(entry.data.city)}`;
+const backLink = `${import.meta.env.BASE_URL}/${slugify(entry.data.country)}/${slugify(entry.data.region)}/${slugify(entry.data.city)}`;
 ---
 
 <Layout title={entry.data.title}>
