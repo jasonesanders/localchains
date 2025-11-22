@@ -65,7 +65,7 @@ cityChains.forEach(chain => {
         <ul class="business-list">
           {byCategory[category].map((chain) => (
             <li>
-              <a href={`/${country}/${region}/${city}/${chain.slug}`}>{chain.data.title}</a>
+              <a href={`${import.meta.env.BASE_URL}${country}/${region}/${city}/${chain.slug}`}>{chain.data.title}</a>
             </li>
           ))}
         </ul>
